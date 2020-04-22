@@ -26,7 +26,7 @@
  * ```
  */
 
-import './index.css';
+import './styles/main.css';
 const startGame = require('./game');
 
 const init = () => {
