@@ -1,7 +1,5 @@
-class Logger {
+export default class Logger {
     constructor() {
         
     }
 }
-
-module.exports = Logger;

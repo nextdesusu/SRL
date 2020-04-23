@@ -26,13 +26,12 @@
  * ```
  */
 
-import './styles/main.css';
-const startGame = require('./game');
+import "./styles/main.css";
+import startGame from "./game";
 
 const init = () => {
-    const BODY = document.querySelector('body');
-    startGame(BODY, 800, 600);
-}
+  const BODY = document.querySelector("body");
+  startGame(BODY, 800, 600);
+};
 
-window.addEventListener('DOMContentLoaded', init);
-
+window.addEventListener("DOMContentLoaded", init);
