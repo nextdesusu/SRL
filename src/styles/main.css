@@ -3,3 +3,9 @@ html, body {
   padding: 0 !important;
   overflow: hidden;
 }
+
+* {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+}

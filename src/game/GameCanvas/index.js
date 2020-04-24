@@ -23,8 +23,7 @@ export default class GameCanvas {
     }
   }
 
-  toScreenSize() {
-    const { width, height } = window.screen;
+  toScreenSize(width, height) {
     this._width = width;
     this._height = height;
     this._CANVAS.style.width = `${width}px`;
