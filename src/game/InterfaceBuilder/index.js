@@ -25,7 +25,7 @@ export default class InterfaceBuilder {
     this._dialogue.style.height = `${oneThirdOfScreen}px`;
   }
 
-  toScreenSize(width, height) {
+  setSize(width, height) {
     this._resizeDialogue(width, height);
   }
 }
