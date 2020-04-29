@@ -2,11 +2,9 @@ import "./canvas.css";
 
 export default class GameCanvas {
   constructor(body, width, height) {
-    this._CANVAS = this._createCanvas(body);
-    this._CANVAS.width = width;
-    this._CANVAS.height = height;
     this._width = 0;
     this._height = 0;
+    this._CANVAS = this._createCanvas(body, width, height);
     this.setSize(width, height);
   }
 
@@ -18,10 +16,12 @@ export default class GameCanvas {
     this.ctx.clearRect(0, 0, this._width, this._height);
   }
 
-  _createCanvas(body) {
+  _createCanvas(body, width, height) {
     if (this._CANVAS === undefined) {
       const CANVAS = document.createElement("canvas");
       CANVAS.id = "main-canvas";
+      CANVAS.width = width;
+      CANVAS.height = height;
       body.appendChild(CANVAS);
       return CANVAS;
     } else {
