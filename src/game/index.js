@@ -1,6 +1,7 @@
 import InterfaceBuilder from "./InterfaceBuilder";
 import GameCanvas from "./GameCanvas";
 import FileLoader from "./FileLoader";
+import RandomGenerator from "./RandomGenerator";
 
 const startGame = async (body, width, height) => {
   const Canvas = new GameCanvas(body, width, height);
@@ -17,9 +18,12 @@ const startGame = async (body, width, height) => {
   });
   const FL = new FileLoader();
 
+  const seed = 100000;
+  const TestGen = new RandomGenerator(seed);
+
   //Main cycle
   const ctx = Canvas.ctx;
-  const ms = 30;
+  const ms = 300;
   ctx.fillStyle = "red";
   const tileNamesSet = new Set();
   tileNamesSet.add("earthground");
@@ -31,6 +35,7 @@ const startGame = async (body, width, height) => {
     //Canvas.refresh();
     ctx.drawImage(tile, 0, 0, 32, 32);
     //console.log("x", x);
+    console.log(TestGen.generate(100));
   }, ms);
 };
 
