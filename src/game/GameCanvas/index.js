@@ -38,19 +38,15 @@ export default class GameCanvas {
 
   drawMap(map, mapTiles) {
     const length = map.length;
-    let yShift = 0;
     const ctx = this.ctx;
     for (let x = 0; x < length; x++) {
-      let xShift = 0;
       for (let y = 0; y < length; y++) {
         if (map._map[x][y].blocked) {
-          ctx.drawImage(mapTiles.wall, xShift, yShift, 32, 32);
+          ctx.drawImage(mapTiles.wall, x * 32, y * 32, 32, 32);
         } else {
-          ctx.drawImage(mapTiles.ground, xShift, yShift, 32, 32);
+          ctx.drawImage(mapTiles.ground, x * 32, y * 32, 32, 32);
         }
-        xShift += 32;
       }
-      yShift += 32;
     }
   }
 }
