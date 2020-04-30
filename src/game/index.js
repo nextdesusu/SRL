@@ -35,7 +35,7 @@ const startGame = async (body, width, height) => {
   await FL.loadTiles(["assets", "tiles", "level"], tileNamesSet);
   console.log(GameMap._map);
   const mapTiles = {
-    wall: FL.getTile("brickwall"),
+    wall: FL.getTile("stonewall"),
     ground: FL.getTile("earthground")
   }
   setInterval(() => {
