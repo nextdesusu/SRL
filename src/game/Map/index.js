@@ -6,6 +6,13 @@ export default class Map {
     this._map = null;
   }
 
+  get size() {
+      if (this._map === null) {
+          throw Error("Map is not generated or loaded!");
+      }
+      return this._map.length;
+  }
+
   generateMap(size) {
     const _map = this.mapFilledWithTiles(size);
     this.setBorders(_map, size);

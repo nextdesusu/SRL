@@ -35,4 +35,18 @@ export default class GameCanvas {
     this._CANVAS.style.width = `${width}px`;
     this._CANVAS.style.height = `${height}px`;
   }
+
+  drawMap(map, mapTiles) {
+    const length = map.length;
+    const ctx = this.ctx;
+    for (let x = 0; x < length; x++) {
+      for (let y = 0; y < length; y++) {
+        if (map._map[x][y].blocked) {
+          ctx.drawImage(mapTiles.wall, x * 32, y * 32, 32, 32);
+        } else {
+          ctx.drawImage(mapTiles.ground, x * 32, y * 32, 32, 32);
+        }
+      }
+    }
+  }
 }

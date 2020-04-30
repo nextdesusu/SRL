@@ -33,11 +33,15 @@ const startGame = async (body, width, height) => {
   tileNamesSet.add("stonewall");
   tileNamesSet.add("brickwall");
   await FL.loadTiles(["assets", "tiles", "level"], tileNamesSet);
-  const tile = FL.getTile("brickwall");
   console.log(GameMap._map);
+  const mapTiles = {
+    wall: FL.getTile("brickwall"),
+    ground: FL.getTile("earthground")
+  }
   setInterval(() => {
     //Canvas.refresh();
-    ctx.drawImage(tile, 0, 0, 32, 32);
+    Canvas.drawMap(GameMap, mapTiles);
+    //ctx.drawImage(tile, 0, 0, 32, 32);
     //console.log("x", x);
     //console.log(TestGen.generate(100));
   }, ms);
