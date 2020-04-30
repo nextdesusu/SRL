@@ -2,6 +2,7 @@ import InterfaceBuilder from "./InterfaceBuilder";
 import GameCanvas from "./GameCanvas";
 import FileLoader from "./FileLoader";
 import RandomGenerator from "./RandomGenerator";
+import Map from "./Map";
 
 const startGame = async (body, width, height) => {
   const Canvas = new GameCanvas(body, width, height);
@@ -21,6 +22,8 @@ const startGame = async (body, width, height) => {
   const seed = 100000;
   const TestGen = new RandomGenerator(seed);
 
+  const GameMap = new Map();
+  GameMap.generateMap(10);
   //Main cycle
   const ctx = Canvas.ctx;
   const ms = 300;
@@ -31,11 +34,12 @@ const startGame = async (body, width, height) => {
   tileNamesSet.add("brickwall");
   await FL.loadTiles(["assets", "tiles", "level"], tileNamesSet);
   const tile = FL.getTile("brickwall");
+  console.log(GameMap._map);
   setInterval(() => {
     //Canvas.refresh();
     ctx.drawImage(tile, 0, 0, 32, 32);
     //console.log("x", x);
-    console.log(TestGen.generate(100));
+    //console.log(TestGen.generate(100));
   }, ms);
 };
 
