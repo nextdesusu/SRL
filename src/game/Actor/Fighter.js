@@ -1,8 +1,9 @@
 export default class Fighter {
-  constructor(str, dex, con) {
+  constructor(str, dex, con, RGB) {
     this.str = str;
     this.dex = dex;
     this.con = con;
+    this.RGB = RGB;
     this.weapon = null;
     this.hp = this.maxHp;
   }
