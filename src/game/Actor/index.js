@@ -1,6 +1,3 @@
-import Fighter from "./Fighter";
-import MapAdapter from "./MapAdapter";
-
 export default class Actor {
   constructor(name, tileIndex, map, x, y, actorsList, fighter, ai = null) {
     this.name = name;
@@ -10,7 +7,6 @@ export default class Actor {
     this.y = y;
     this.actorsList = actorsList;
     this.fighter = fighter;
-    this.mapAdapter = mapAdapter;
     this.ai = ai;
     this.blocks = true;
   }

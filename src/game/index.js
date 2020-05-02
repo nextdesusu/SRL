@@ -3,6 +3,7 @@ import GameCanvas from "./GameCanvas";
 import FileLoader from "./FileLoader";
 import RandomGenerator from "./RandomGenerator";
 import Map from "./Map";
+import ActorFabric from "./Fabric/ActorFabric";
 
 const startGame = async (body, width, height) => {
   const Canvas = new GameCanvas(body, width, height);
@@ -19,9 +20,6 @@ const startGame = async (body, width, height) => {
   });
   const FL = new FileLoader();
 
-  const seed = 100000;
-  const TestGen = new RandomGenerator(seed);
-
   const GameMap = new Map();
   GameMap.generateMap(10);
   //Main cycle
@@ -36,14 +34,19 @@ const startGame = async (body, width, height) => {
   console.log(GameMap._map);
   const mapTiles = {
     wall: FL.getTile("stonewall"),
-    ground: FL.getTile("earthground")
-  }
+    ground: FL.getTile("earthground"),
+  };
+
+  const seed = 100000;
+  const Spawner = new ActorFabric(new RandomGenerator(seed));
+  const player = Spawner.spawnPlayer("player", GameMap, 2, 2);
   setInterval(() => {
     //Canvas.refresh();
     Canvas.drawMap(GameMap, mapTiles);
     //ctx.drawImage(tile, 0, 0, 32, 32);
     //console.log("x", x);
     //console.log(TestGen.generate(100));
+    console.log(player);
   }, ms);
 };
 
