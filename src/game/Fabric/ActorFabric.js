@@ -2,22 +2,23 @@ import Actor from "../Actor";
 import Fighter from "../Actor/Fighter";
 
 export default class ActorFabric {
-  constructor(randomBattleGenerator) {
+  constructor(randomBattleGenerator, map) {
     this.RBG = randomBattleGenerator;
+    this.map = map;
     this.actorsList = [];
   }
-  spawnPlayer(name, map, x, y) {
+  spawnPlayer(name, x, y) {
     const fighter = new Fighter(10, 10, 10, this.RGB);
-    const actor = new Actor(name, 0, map, x, y, this.actorsList, fighter);
+    const actor = new Actor(name, 0, this.map, x, y, this.actorsList, fighter);
     this.actorsList.push(actor);
     return actor;
   }
-  spawnTestMonster(map, x, y) {
+  spawnTestMonster(x, y) {
     const fighter = new Fighter(3, 3, 3, this.RGB);
     const actor = new Actor(
       "test-monster",
       0,
-      map,
+      this.map,
       x,
       y,
       this.actorsList,

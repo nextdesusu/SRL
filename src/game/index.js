@@ -5,49 +5,53 @@ import RandomGenerator from "./RandomGenerator";
 import Map from "./Map";
 import ActorFabric from "./Fabric/ActorFabric";
 
-const startGame = async (body, width, height) => {
-  const Canvas = new GameCanvas(body, width, height);
-  const Interface = new InterfaceBuilder(body, {
-    system: "rgba(0, 0, 0, 0.3)",
-  });
-  Interface.createDialogue("system");
-  Interface.setSize(width, height);
-  window.addEventListener("resize", () => {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    Canvas.setSize(width, height);
-    Interface.setSize(width, height);
-  });
-  const FL = new FileLoader();
+export default class Game {
+  constructor(body, width, height) {
+    this.Canvas = new GameCanvas(body, width, height);
+    this.Interface = new InterfaceBuilder(body, {
+      system: "rgba(0, 0, 0, 0.3)",
+    });
+    this.FileLoader = new FileLoader();
+    this.GameMap = new Map();
+    const seed = 100000;
+    this.Spawner = new ActorFabric(new RandomGenerator(seed), this.GameMap);
+    this.init(width, height);
+  }
 
-  const GameMap = new Map();
-  GameMap.generateMap(10);
-  //Main cycle
-  const ctx = Canvas.ctx;
-  const ms = 300;
-  ctx.fillStyle = "red";
-  const tileNamesSet = new Set();
-  tileNamesSet.add("earthground");
-  tileNamesSet.add("stonewall");
-  tileNamesSet.add("brickwall");
-  await FL.loadTiles(["assets", "tiles", "level"], tileNamesSet);
-  console.log(GameMap._map);
-  const mapTiles = {
-    wall: FL.getTile("stonewall"),
-    ground: FL.getTile("earthground"),
-  };
+  init(width, height) {
+    this.Interface.createDialogue("system");
+    this.Interface.setSize(width, height);
+    window.addEventListener("resize", () => {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      this.Canvas.setSize(width, height);
+      this.Interface.setSize(width, height);
+    });
+    this.GameMap.generateMap(10);
+  }
 
-  const seed = 100000;
-  const Spawner = new ActorFabric(new RandomGenerator(seed));
-  const player = Spawner.spawnPlayer("player", GameMap, 2, 2);
-  setInterval(() => {
-    //Canvas.refresh();
-    Canvas.drawMap(GameMap, mapTiles);
-    //ctx.drawImage(tile, 0, 0, 32, 32);
-    //console.log("x", x);
-    //console.log(TestGen.generate(100));
-    console.log(player);
-  }, ms);
-};
-
-export default startGame;
+  async begin() {
+    const ctx = this.Canvas.ctx;
+    const ms = 300;
+    ctx.fillStyle = "red";
+    const tileNamesSet = new Set();
+    tileNamesSet.add("earthground");
+    tileNamesSet.add("stonewall");
+    tileNamesSet.add("brickwall");
+    await this.FileLoader.loadTiles(["assets", "tiles", "level"], tileNamesSet);
+    console.log(this.GameMap._map);
+    const mapTiles = {
+      wall: this.FileLoader.getTile("stonewall"),
+      ground: this.FileLoader.getTile("earthground"),
+    };
+    const player = this.Spawner.spawnPlayer("player", this.GameMap, 2, 2);
+    setInterval(() => {
+      //Canvas.refresh();
+      this.Canvas.drawMap(this.GameMap, mapTiles);
+      //ctx.drawImage(tile, 0, 0, 32, 32);
+      //console.log("x", x);
+      //console.log(TestGen.generate(100));
+      console.log(player);
+    }, ms);
+  }
+}

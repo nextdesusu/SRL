@@ -27,11 +27,12 @@
  */
 
 import "./styles/main.css";
-import startGame from "./game";
+import Game from "./Game";
 
 const init = () => {
   const BODY = document.querySelector("body");
-  startGame(BODY, 800, 600);
+  const GAME = new Game(BODY, 800, 600);
+  GAME.begin();
 };
 
 window.addEventListener("DOMContentLoaded", init);
