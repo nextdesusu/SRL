@@ -1,13 +1,33 @@
 export default class Actor {
-  constructor(name, tileIndex, map, x, y, actorsList, fighter, ai = null) {
+  constructor(
+    name,
+    tileIndex,
+    map,
+    x,
+    y,
+    actorsList,
+    fighter,
+    stats,
+    ai = null
+  ) {
     this.name = name;
     this.tileIndex = tileIndex;
     this.map = map;
     this.x = x;
     this.y = y;
     this.actorsList = actorsList;
+
+    fighter.owner = this;
     this.fighter = fighter;
+
+    stats.owner = this;
+    this.stats = stats;
+
+    if (ai !== null) {
+      ai.owner = this;
+    }
     this.ai = ai;
+
     this.blocks = true;
   }
 
