@@ -4,6 +4,7 @@ import FileLoader from "./FileLoader";
 import RandomGenerator from "./RandomGenerator";
 import Map from "./Map";
 import ActorFabric from "./Fabric/ActorFabric";
+import { TILE_SIZE } from "./consts/File";
 
 export default class Game {
   constructor(body, width, height) {
@@ -30,10 +31,34 @@ export default class Game {
     this.GameMap.generateMap(10);
   }
 
-  async begin() {
+  drawMap(mapTiles) {
+    const map = this.GameMap;
+    const size = map.size;
     const ctx = this.Canvas.ctx;
-    const ms = 300;
-    ctx.fillStyle = "red";
+    for (let x = 0; x < size; x++) {
+      for (let y = 0; y < size; y++) {
+        if (map._map[x][y].blocked) {
+          ctx.drawImage(
+            mapTiles.wall,
+            x * TILE_SIZE,
+            y * TILE_SIZE,
+            TILE_SIZE,
+            TILE_SIZE
+          );
+        } else {
+          ctx.drawImage(
+            mapTiles.ground,
+            x * TILE_SIZE,
+            y * TILE_SIZE,
+            TILE_SIZE,
+            TILE_SIZE
+          );
+        }
+      }
+    }
+  }
+
+  async begin() {
     const tileNamesSet = new Set();
     tileNamesSet.add("earthground");
     tileNamesSet.add("stonewall");
@@ -45,13 +70,6 @@ export default class Game {
       ground: this.FileLoader.getTile("earthground"),
     };
     const player = this.Spawner.spawnPlayer("player", this.GameMap, 2, 2);
-    setInterval(() => {
-      //Canvas.refresh();
-      this.Canvas.drawMap(this.GameMap, mapTiles);
-      //ctx.drawImage(tile, 0, 0, 32, 32);
-      //console.log("x", x);
-      //console.log(TestGen.generate(100));
-      console.log(player);
-    }, ms);
+    this.drawMap(mapTiles);
   }
 }

@@ -22,6 +22,10 @@ export default class FileLoader {
     throw Error(`${tileName} is not loaded`);
   }
 
+  get currentMapTiles() {
+    return this._loaded.tiles;
+  }
+
   async loadTiles(PathToTiles, requiredNamesSet) {
     const fpath = path.join(this._appPath, ...PathToTiles);
     return new Promise((resolve, reject) => {
