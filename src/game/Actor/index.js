@@ -16,7 +16,6 @@ export default class Actor {
     this.x = x;
     this.y = y;
     this.actorsList = actorsList;
-
     fighter.owner = this;
     this.fighter = fighter;
 
@@ -39,7 +38,7 @@ export default class Actor {
   }
 
   isBlocked(x, y) {
-    if (!this.map.isBlocked(x, y)) {
+    if (this.map.isBlocked(x, y)) {
       return true;
     }
 
@@ -55,7 +54,8 @@ export default class Actor {
   move(dx, dy) {
     const newX = this.x + dx;
     const newY = this.y + dy;
-    if (!this.isBlocked(dx, dy)) {
+    if (!this.isBlocked(newX, newY)) {
+      console.log("moving to", dx, dy);
       this.x = newX;
       this.y = newY;
     }

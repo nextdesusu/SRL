@@ -7,10 +7,14 @@ export default class Map {
   }
 
   get size() {
-      if (this._map === null) {
-          throw Error("Map is not generated or loaded!");
-      }
-      return this._map.length;
+    if (this._map === null) {
+      throw Error("Map is not generated or loaded!");
+    }
+    return this._map.length;
+  }
+
+  isBlocked(x, y) {
+    return this._map[x][y].blocked;
   }
 
   generateMap(size) {
@@ -26,12 +30,12 @@ export default class Map {
     return new Array(size).fill(null).map(getTilesRow);
   }
 
-  setBorders(map, size){
-      for (let i = 0; i < size; i++){
-          map[i][0].blocked = true;
-          map[i][size - 1].blocked = true;
-          map[0][i].blocked = true;
-          map[size - 1][i].blocked = true;
-      }
+  setBorders(map, size) {
+    for (let i = 0; i < size; i++) {
+      map[i][0].blocked = true;
+      map[i][size - 1].blocked = true;
+      map[0][i].blocked = true;
+      map[size - 1][i].blocked = true;
+    }
   }
 }

@@ -5,6 +5,7 @@ import RandomGenerator from "./RandomGenerator";
 import Map from "./Map";
 import ActorFabric from "./Fabric/ActorFabric";
 import { TILE_SIZE } from "./consts/File";
+import { DIRECTIONS } from "./consts/Actor";
 
 export default class Game {
   constructor(body, width, height) {
@@ -16,6 +17,7 @@ export default class Game {
     this.GameMap = new Map();
     const seed = 100000;
     this.Spawner = new ActorFabric(new RandomGenerator(seed), this.GameMap);
+    this.player = this.Spawner.spawnPlayer("player", 4, 4);
     this.init(width, height);
   }
 
@@ -28,7 +30,21 @@ export default class Game {
       this.Canvas.setSize(width, height);
       this.Interface.setSize(width, height);
     });
-    this.GameMap.generateMap(10);
+    this.GameMap.generateMap(20);
+  }
+
+  drawActors() {
+    const ctx = this.Canvas.ctx;
+    ctx.fillStyle = "red";
+    const actors = this.Spawner.actorsList;
+    for (const actor of actors) {
+      if (actor.name === "player") {
+        ctx.fillStyle = "green";
+      } else {
+        ctx.fillStyle = "red";
+      }
+      ctx.fillRect(actor.x * 32, actor.y * 32, 32, 32);
+    }
   }
 
   drawMap(mapTiles) {
@@ -58,18 +74,46 @@ export default class Game {
     }
   }
 
+  nextTurn() {
+    const mapTiles = {
+      wall: this.FileLoader.getTile("stonewall"),
+      ground: this.FileLoader.getTile("earthground"),
+    };
+    this.drawMap(mapTiles);
+    this.drawActors();
+  }
+
   async begin() {
     const tileNamesSet = new Set();
     tileNamesSet.add("earthground");
     tileNamesSet.add("stonewall");
     tileNamesSet.add("brickwall");
     await this.FileLoader.loadTiles(["assets", "tiles", "level"], tileNamesSet);
-    console.log(this.GameMap._map);
-    const mapTiles = {
-      wall: this.FileLoader.getTile("stonewall"),
-      ground: this.FileLoader.getTile("earthground"),
+
+    const proceedIfNeeded = (event) => {
+      console.log(DIRECTIONS);
+      if (event instanceof KeyboardEvent) {
+        if (event.key === "ArrowRight") {
+          const { x, y } = DIRECTIONS.right;
+          this.player.move(x, y);
+        } else if (event.key === "ArrowLeft") {
+          const { x, y } = DIRECTIONS.left;
+          this.player.move(x, y);
+        } else if (event.key === "ArrowUp") {
+          const { x, y } = DIRECTIONS.up;
+          this.player.move(x, y);
+        } else {
+          const { x, y } = DIRECTIONS.down;
+          this.player.move(x, y);
+        }
+        this.nextTurn();
+      }
+      if (event instanceof MouseEvent) {
+        console.log("mouse pressed");
+      }
     };
-    const player = this.Spawner.spawnPlayer("player", this.GameMap, 2, 2);
-    this.drawMap(mapTiles);
+    this.Spawner.spawnTestMonster(5, 5);
+    window.addEventListener("keydown", proceedIfNeeded);
+    window.addEventListener("mousedown", proceedIfNeeded);
   }
 }
