@@ -26,26 +26,15 @@ export default class FileLoader {
     return this._loaded.tiles;
   }
 
-  async loadTiles(PathToTiles, requiredNamesSet) {
+  loadTiles(PathToTiles, requiredNamesSet) {
     const fpath = path.join(this._appPath, ...PathToTiles);
-    return new Promise((resolve, reject) => {
-      fs.readdir(fpath, (err, files) => {
-        if (err) {
-          reject(err);
-        }
-        for (const fileName of files) {
-          const filteredName = fileName.replace(/.png/, "");
-          if (requiredNamesSet.has(filteredName)) {
-            const pathToFile = path.join(fpath, fileName);
-            const loaded = fs.readFileSync(pathToFile);
-            const base64 = loaded.toString("base64");
-            const _img = new Image();
-            _img.src = `data:image/png;base64,${base64}`;
-            this.setTile(filteredName, _img);
-          }
-        }
-        resolve(true);
-      });
-    });
+    for (const fileName of requiredNamesSet) {
+      const pathToFile = path.join(fpath, `${fileName}.png`);
+      const loaded = fs.readFileSync(pathToFile);
+      const base64 = loaded.toString("base64");
+      const _img = new Image();
+      _img.src = `data:image/png;base64,${base64}`;
+      this.setTile(fileName, _img);
+    }
   }
 }

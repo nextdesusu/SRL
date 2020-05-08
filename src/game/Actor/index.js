@@ -1,26 +1,18 @@
 export default class Actor {
-  constructor(
-    name,
-    tileIndex,
-    map,
-    x,
-    y,
-    actorsList,
-    fighter,
-    stats,
-    ai = null
-  ) {
+  constructor(name, tileIndex, map, x, y, fighter, stats, actors, ai = null) {
     this.name = name;
     this.tileIndex = tileIndex;
     this.map = map;
     this.x = x;
     this.y = y;
-    this.actorsList = actorsList;
-    fighter.owner = this;
-    this.fighter = fighter;
+    this.actorsList = actors;
 
     stats.owner = this;
     this.stats = stats;
+
+    fighter.owner = this;
+    fighter.hp = stats.maxHp;
+    this.fighter = fighter;
 
     if (ai !== null) {
       ai.owner = this;
@@ -41,8 +33,7 @@ export default class Actor {
     if (this.map.isBlocked(x, y)) {
       return true;
     }
-
-    for (const actor of this.actorsList) {
+    for (const actor of this.actorsList.all) {
       if (actor.blocks && actor.x === x && actor.y === y) {
         return true;
       }
@@ -55,7 +46,6 @@ export default class Actor {
     const newX = this.x + dx;
     const newY = this.y + dy;
     if (!this.isBlocked(newX, newY)) {
-      console.log("moving to", dx, dy);
       this.x = newX;
       this.y = newY;
     }
@@ -66,10 +56,7 @@ export default class Actor {
   }
 
   distanceTo(other) {
-    if (!other.mapAdapter) {
-      throw Error(`Object dont have a map adapter!`);
-    }
-    const { x, y } = other.mapAdapter;
+    const { x, y } = other;
     return this.distance(x, y);
   }
 

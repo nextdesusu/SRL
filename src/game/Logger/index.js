@@ -1,5 +1,25 @@
 export default class Logger {
-    constructor() {
-        
+    constructor(logBoard, textNode) {
+        this.logBoard = logBoard;
+        this.textNode = textNode;
+    }
+
+    log(text, color = 'gray') {
+        const newTextNode = this.textNode.cloneNode();
+        newTextNode.style.color = color;
+        newTextNode.innerText = text;
+        this.logBoard.appendChild(newTextNode);
+    }
+
+    say(text) {
+        this.log(text, 'black');
+    }
+
+    battle(text) {
+        this.log(text, 'red');
+    }
+
+    warning(text) {
+        this.log(text, 'yellow');
     }
 }

@@ -10,6 +10,10 @@ export default class InterfaceBuilder {
     return this._DIV.cloneNode();
   }
 
+  get dialogue() {
+    return this._dialogue;
+  }
+
   createDialogue(theme) {
     const dialogueContainer = this.newDiv;
     dialogueContainer.className = "interface-dialogue";

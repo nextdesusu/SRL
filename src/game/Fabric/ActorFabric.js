@@ -1,43 +1,52 @@
 import Actor from "../Actor";
 import Stats from "../Actor/Stats";
 import Fighter from "../Actor/Fighter";
+import { BaseAi } from "../Actor/Ai";
+
+import FabricList from "./FabricList";
 
 export default class ActorFabric {
-  constructor(randomBattleGenerator, map) {
+  constructor(randomBattleGenerator, map, logger) {
     this.RBG = randomBattleGenerator;
     this.map = map;
-    this.actorsList = [];
+    this.player = null;
+    this.actors = new FabricList();
+    this.Logger = logger;
   }
   spawnPlayer(name, x, y) {
-    const fighter = new Fighter(this.RGB);
+    if (this.player !== null) {
+      throw Error("Player already spawned!");
+    }
+    const fighter = new Fighter(this.RGB, this.Logger);
     const stats = new Stats(10, 10, 10, 10, 10);
-    const actor = new Actor(
+    const player = new Actor(
       name,
       0,
       this.map,
       x,
       y,
-      this.actorsList,
       fighter,
-      stats
+      stats,
+      this.actors
     );
-    this.actorsList.push(actor);
-    return actor;
+    this.actors.add(player);
+    this.player = player;
   }
   spawnTestMonster(x, y) {
-    const fighter = new Fighter(this.RGB);
+    const fighter = new Fighter(this.RGB, this.Logger);
     const stats = new Stats(10, 10, 10, 10, 10);
-    const actor = new Actor(
+    const ai = new BaseAi(this.player);
+    const monster = new Actor(
       "test-monster",
-      0,
+      1,
       this.map,
       x,
       y,
-      this.actorsList,
       fighter,
-      stats
+      stats,
+      this.actors,
+      ai
     );
-    this.actorsList.push(actor);
-    return actor;
+    this.actors.add(monster);
   }
 }
