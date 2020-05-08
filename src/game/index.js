@@ -43,10 +43,13 @@ export default class Game {
     this.Spawner.spawnPlayer("player", 3, 3);
   }
 
-  drawActors(mapBodies) {
+  drawActors() {
+    const mapBodies = [
+      this.FileLoader.getTile("test1"),
+      this.FileLoader.getTile("test2"),
+    ];
     const ctx = this.Canvas.ctx;
     const { actors } = this.Spawner;
-    console.log(actors.all);
     for (const { tileIndex, x, y } of actors.all) {
       ctx.drawImage(
         mapBodies[tileIndex],
@@ -58,10 +61,14 @@ export default class Game {
     }
   }
 
-  drawMap(mapTiles) {
+  drawMap() {
     const map = this.GameMap;
     const size = map.size;
     const ctx = this.Canvas.ctx;
+    const mapTiles = {
+      wall: this.FileLoader.getTile("stonewall"),
+      ground: this.FileLoader.getTile("earthground"),
+    };
     for (let x = 0; x < size; x++) {
       for (let y = 0; y < size; y++) {
         if (map._map[x][y].blocked) {
@@ -95,17 +102,9 @@ export default class Game {
   }
 
   nextTurn() {
-    const mapTiles = {
-      wall: this.FileLoader.getTile("stonewall"),
-      ground: this.FileLoader.getTile("earthground"),
-    };
-    const mapBodies = [
-      this.FileLoader.getTile("test1"),
-      this.FileLoader.getTile("test2"),
-    ];
     this.botsTurn();
-    this.drawMap(mapTiles);
-    this.drawActors(mapBodies);
+    this.drawMap();
+    this.drawActors();
   }
 
   begin() {
@@ -113,23 +112,39 @@ export default class Game {
     const bodieNames = ["test1", "test2"];
     this.FileLoader.loadTiles(["assets", "tiles", "level"], tileNames);
     this.FileLoader.loadTiles(["assets", "tiles", "bodies"], bodieNames);
+    this.drawMap();
+    this.drawActors();
 
     this.Spawner.spawnTestMonster(7, 8);
     const proceedIfNeeded = (event) => {
       const { player } = this.Spawner;
       if (event instanceof KeyboardEvent) {
-        if (event.key === "ArrowRight") {
-          const { x, y } = DIRECTIONS.right;
-          player.move(x, y);
-        } else if (event.key === "ArrowLeft") {
-          const { x, y } = DIRECTIONS.left;
-          player.move(x, y);
-        } else if (event.key === "ArrowUp") {
-          const { x, y } = DIRECTIONS.up;
-          player.move(x, y);
-        } else {
-          const { x, y } = DIRECTIONS.down;
-          player.move(x, y);
+        console.log(event.key);
+        switch (event.key) {
+          case "ArrowRight":
+            player.move(1, 0);
+            break;
+          case "ArrowLeft":
+            player.move(-1, 0);
+            break;
+          case "ArrowUp":
+            player.move(0, -1);
+            break;
+          case "ArrowDown":
+            player.move(0, 1);
+            break;
+          case "PageDown":
+            player.move(1, 1);
+            break;
+          case "Home":
+            player.move(-1, -1);
+            break;
+          case "PageUp":
+            player.move(1, -1);
+            break;
+          case "End":
+            player.move(-1, -1);
+            break;
         }
         this.nextTurn();
       }

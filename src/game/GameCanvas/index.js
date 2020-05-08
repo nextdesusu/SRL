@@ -1,5 +1,3 @@
-import "./canvas.css";
-
 export default class GameCanvas {
   constructor(body, width, height) {
     this._width = 0;

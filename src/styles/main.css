@@ -1,11 +1,26 @@
 html, body {
-  margin: 0 !important;
-  padding: 0 !important;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  width: 100%;
+  height: 100%;
+  display: flex;
   overflow: hidden;
 }
 
-* {
+#main-canvas {
   position: fixed;
-  top: 0px;
-  left: 0px;
+}
+
+.interface-dialogue {
+  width: 100%;
+  height: 30vh;
+  z-index: 1000;
+  margin-top: 70vh;
+}
+
+.interface-dialogue > * {
+  margin: 1%;
 }

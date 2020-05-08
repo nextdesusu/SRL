@@ -23,10 +23,12 @@ export default class InterfaceBuilder {
   }
 
   _resizeDialogue(width, height) {
+    /*
     const oneThirdOfScreen = Math.ceil(height / 3);
     this._dialogue.style.width = `${width}px`;
     this._dialogue.style.top = `${oneThirdOfScreen * 2}px`;
     this._dialogue.style.height = `${oneThirdOfScreen}px`;
+    */
   }
 
   setSize(width, height) {
