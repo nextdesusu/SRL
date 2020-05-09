@@ -5,7 +5,6 @@ import RandomGenerator from "./RandomGenerator";
 import Map from "./Map";
 import ActorFabric from "./Fabric/ActorFabric";
 import { TILE_SIZE } from "./consts/File";
-import { DIRECTIONS } from "./consts/Actor";
 import Logger from "./Logger";
 
 export default class Game {
@@ -112,38 +111,49 @@ export default class Game {
     const bodieNames = ["test1", "test2"];
     this.FileLoader.loadTiles(["assets", "tiles", "level"], tileNames);
     this.FileLoader.loadTiles(["assets", "tiles", "bodies"], bodieNames);
-    this.drawMap();
-    this.drawActors();
-
-    this.Spawner.spawnTestMonster(7, 8);
+    
+    const moveOrAttack = (dx, dy) => {
+      const { player, actors } = this.Spawner;
+      const newX = player.x + dx;
+      const newY = player.y + dy;
+      if (Math.abs(dx) < 2 && Math.abs(dy) < 2) {
+        for (let actor of actors.all) {
+          if (actor.x === newX && actor.y === newY) {
+            player.fighter.attack(actor);
+            return;
+          }
+        }
+        player.move(dx, dy);
+      }
+    };
     const proceedIfNeeded = (event) => {
       const { player } = this.Spawner;
       if (event instanceof KeyboardEvent) {
-        console.log(event.key);
+        //console.log(event.key);
         switch (event.key) {
           case "ArrowRight":
-            player.move(1, 0);
+            moveOrAttack(1, 0);
             break;
           case "ArrowLeft":
-            player.move(-1, 0);
+            moveOrAttack(-1, 0);
             break;
           case "ArrowUp":
-            player.move(0, -1);
+            moveOrAttack(0, -1);
             break;
           case "ArrowDown":
-            player.move(0, 1);
+            moveOrAttack(0, 1);
             break;
           case "PageDown":
-            player.move(1, 1);
+            moveOrAttack(1, 1);
             break;
           case "Home":
-            player.move(-1, -1);
+            moveOrAttack(-1, -1);
             break;
           case "PageUp":
-            player.move(1, -1);
+            moveOrAttack(1, -1);
             break;
           case "End":
-            player.move(-1, -1);
+            moveOrAttack(-1, 1);
             break;
         }
         this.nextTurn();
@@ -152,7 +162,12 @@ export default class Game {
         console.log("mouse pressed");
       }
     };
-    window.addEventListener("keydown", proceedIfNeeded);
-    window.addEventListener("mousedown", proceedIfNeeded);
+    setTimeout(() => {
+      this.Logger.congrat("Игра началась!");
+      this.Spawner.spawnTestMonster(7, 8);
+      window.addEventListener("keydown", proceedIfNeeded);
+      window.addEventListener("mousedown", proceedIfNeeded);
+      this.nextTurn();
+    }, 1000)
   }
 }

@@ -19,6 +19,10 @@ export default class Logger {
         this.log(text, 'red');
     }
 
+    congrat(text) {
+        this.log(text, 'green');
+    }
+
     warning(text) {
         this.log(text, 'yellow');
     }

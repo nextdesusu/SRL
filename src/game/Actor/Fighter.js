@@ -7,8 +7,9 @@ export default class Fighter {
   }
 
   attack(target) {
-    this.Logger.battle(this.owner.name, "attacking", target.name)
-    target.fighter.takeDamage(10);
+    const damage = this.owner.stats.str;
+    this.Logger.battle(`${this.owner.name} атакует ${target.name} нанося ${damage} урона`);
+    target.fighter.takeDamage(damage);
   }
 
   takeDamage(amount) {
@@ -19,7 +20,7 @@ export default class Fighter {
   }
 
   die() {
-    console.log(this.owner.name, "died");
+    this.Logger.battle(`${this.owner.name} умирает`);
     this.owner.actorsList.remove(this.owner);
   }
 
