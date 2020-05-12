@@ -12,6 +12,8 @@ body {
 
 #main-canvas {
   position: fixed;
+  width: 1000px;
+  height: 1000px;
 }
 
 .interface-dialogue {

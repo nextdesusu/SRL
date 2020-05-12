@@ -17,10 +17,12 @@ export default class ActorFabric {
     if (this.player !== null) {
       throw Error("Player already spawned!");
     }
+    const fov = 4;
     const fighter = new Fighter(this.RGB, this.Logger);
     const stats = new Stats(10, 10, 10, 10, 10);
     const player = new Actor(
       name,
+      fov,
       0,
       this.map,
       x,
@@ -34,10 +36,12 @@ export default class ActorFabric {
   }
   spawnTestMonster(x, y) {
     const fighter = new Fighter(this.RGB, this.Logger);
+    const fov = 4;
     const stats = new Stats(10, 10, 10, 10, 10);
     const ai = new BaseAi(this.player);
     const monster = new Actor(
       "test-monster",
+      fov,
       1,
       this.map,
       x,

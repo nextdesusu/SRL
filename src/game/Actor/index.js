@@ -1,6 +1,7 @@
 export default class Actor {
-  constructor(name, tileIndex, map, x, y, fighter, stats, actors, ai = null) {
+  constructor(name, fov, tileIndex, map, x, y, fighter, stats, actors, ai = null) {
     this.name = name;
+    this.fov = fov;
     this.tileIndex = tileIndex;
     this.map = map;
     this.x = x;

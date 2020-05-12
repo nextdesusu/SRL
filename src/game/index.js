@@ -9,30 +9,26 @@ import Logger from "./Logger";
 
 export default class Game {
   constructor(body, width, height) {
+
     this.Canvas = new GameCanvas(body, width, height);
     this.Interface = new InterfaceBuilder(body, {
       system: "rgba(0, 0, 0, 0.3)",
     });
     this.FileLoader = new FileLoader();
     this.GameMap = new Map();
-    this.Logger = null;
-
-    this.init(width, height);
-  }
-
-  init(width, height) {
     this.Interface.createDialogue("system");
+    this.Logger = new Logger(
+      this.Interface.dialogue,
+      document.createElement("p")
+    );
     this.Interface.setSize(width, height);
     window.addEventListener("resize", () => {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
+      const width = document.documentElement.clientWidth;
+      const height = document.documentElement.clientHeight;
       this.Canvas.setSize(width, height);
       this.Interface.setSize(width, height);
     });
-    this.GameMap.generateMap(10);
-
-    const p = document.createElement("p");
-    this.Logger = new Logger(this.Interface.dialogue, p);
+    this.GameMap.generateMap(40);
     const seed = 100000;
     this.Spawner = new ActorFabric(
       new RandomGenerator(seed),
@@ -42,52 +38,56 @@ export default class Game {
     this.Spawner.spawnPlayer("player", 3, 3);
   }
 
-  drawActors() {
-    const mapBodies = [
-      this.FileLoader.getTile("test1"),
-      this.FileLoader.getTile("test2"),
-    ];
-    const ctx = this.Canvas.ctx;
-    const { actors } = this.Spawner;
-    for (const { tileIndex, x, y } of actors.all) {
-      ctx.drawImage(
-        mapBodies[tileIndex],
-        x * TILE_SIZE,
-        y * TILE_SIZE,
-        TILE_SIZE,
-        TILE_SIZE
-      );
-    }
-  }
-
-  drawMap() {
+  drawAll() {
+    const { ctx, viewport, width, height } = this.Canvas;
     const map = this.GameMap;
-    const size = map.size;
-    const ctx = this.Canvas.ctx;
+    const mapSize = map.size;
+    const { player, actors } = this.Spawner;
+    viewport.scrollTo(player.x * TILE_SIZE, player.y * TILE_SIZE);
+    let xMin = player.x - player.fov;
+    let yMin = player.y - player.fov;
+    let xMax = player.x + player.fov;
+    let yMax = player.y + player.fov;
+    if (xMin < 0) xMin = 0;
+    if (yMin < 0) yMin = 0;
+    if (xMax > mapSize) xMax = mapSize;
+    if (yMax > mapSize) yMax = mapSize;
+    console.log(viewport.x, viewport.y);
+
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, width, height);
     const mapTiles = {
       wall: this.FileLoader.getTile("stonewall"),
       ground: this.FileLoader.getTile("earthground"),
     };
-    for (let x = 0; x < size; x++) {
-      for (let y = 0; y < size; y++) {
+    const mapBodies = [
+      this.FileLoader.getTile("test1"),
+      this.FileLoader.getTile("test2"),
+    ];
+
+    for (let x = xMin; x < xMax; x++) {
+      for (let y = yMin; y < yMax; y++) {
+        const tileX = Math.floor(
+          x * TILE_SIZE - viewport.x + width * 0.5 - viewport.w * 0.5
+        );
+        const tileY = Math.floor(
+          y * TILE_SIZE - viewport.y + height * 0.5 - viewport.h * 0.5
+        );
         if (map._map[x][y].blocked) {
-          ctx.drawImage(
-            mapTiles.wall,
-            x * TILE_SIZE,
-            y * TILE_SIZE,
-            TILE_SIZE,
-            TILE_SIZE
-          );
+          ctx.drawImage(mapTiles.wall, tileX, tileY, TILE_SIZE, TILE_SIZE);
         } else {
-          ctx.drawImage(
-            mapTiles.ground,
-            x * TILE_SIZE,
-            y * TILE_SIZE,
-            TILE_SIZE,
-            TILE_SIZE
-          );
+          ctx.drawImage(mapTiles.ground, tileX, tileY, TILE_SIZE, TILE_SIZE);
         }
       }
+    }
+    for (const { tileIndex, x, y } of actors.all) {
+      const actorX = Math.floor(
+        x * TILE_SIZE - viewport.x + width * 0.5 - viewport.w * 0.5
+      );
+      const actorY = Math.floor(
+        y * TILE_SIZE - viewport.y + height * 0.5 - viewport.h * 0.5
+      );
+      ctx.drawImage(mapBodies[tileIndex], actorX, actorY, TILE_SIZE, TILE_SIZE);
     }
   }
 
@@ -102,8 +102,7 @@ export default class Game {
 
   nextTurn() {
     this.botsTurn();
-    this.drawMap();
-    this.drawActors();
+    this.drawAll();
   }
 
   begin() {
@@ -111,7 +110,7 @@ export default class Game {
     const bodieNames = ["test1", "test2"];
     this.FileLoader.loadTiles(["assets", "tiles", "level"], tileNames);
     this.FileLoader.loadTiles(["assets", "tiles", "bodies"], bodieNames);
-    
+
     const moveOrAttack = (dx, dy) => {
       const { player, actors } = this.Spawner;
       const newX = player.x + dx;
@@ -168,6 +167,6 @@ export default class Game {
       window.addEventListener("keydown", proceedIfNeeded);
       window.addEventListener("mousedown", proceedIfNeeded);
       this.nextTurn();
-    }, 1000)
+    }, 1000);
   }
 }

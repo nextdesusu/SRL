@@ -1,13 +1,30 @@
+import Viewport from "./Viewport";
+import { TILE_SIZE } from "../consts/File";
+
 export default class GameCanvas {
-  constructor(body, width, height) {
-    this._width = 0;
-    this._height = 0;
+  constructor(body, width, height, fovMult) {
     this._CANVAS = this._createCanvas(body, width, height);
+    this._ctx = this._CANVAS.getContext("2d");
+    this._ctx.imageSmoothingEnabled = false;
+    this._shiftX = 0;
+    this._shiftY = 0;
+
+    this._cursorStartX = 0;
+    this._cursorStartY = 0;
+    this.viewport = new Viewport(0, 0, width, height);
     this.setSize(width, height);
   }
 
   get ctx() {
-    return this._CANVAS.getContext("2d");
+    return this._ctx;
+  }
+
+  get width() {
+    return this._CANVAS.width;
+  }
+
+  get height() {
+    return this._CANVAS.height;
   }
 
   refresh() {
@@ -28,8 +45,7 @@ export default class GameCanvas {
   }
 
   setSize(width, height) {
-    this._width = width;
-    this._height = height;
+    console.log("setting size", width, ":", height)
     this._CANVAS.style.width = `${width}px`;
     this._CANVAS.style.height = `${height}px`;
   }
