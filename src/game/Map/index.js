@@ -26,7 +26,7 @@ export default class Map {
 
   mapFilledWithTiles(size) {
     const getTilesRow = () =>
-      new Array(size).fill(null).map(() => new Tile(false));
+      new Array(size).fill(null).map(() => new Tile(false, 0));
     return new Array(size).fill(null).map(getTilesRow);
   }
 
@@ -36,6 +36,11 @@ export default class Map {
       map[i][size - 1].blocked = true;
       map[0][i].blocked = true;
       map[size - 1][i].blocked = true;
+
+      map[i][0].textureId = 1;
+      map[i][size - 1].textureId = 1;
+      map[0][i].textureId = 1;
+      map[size - 1][i].textureId = 1;
     }
   }
 }

@@ -9,7 +9,6 @@ import Logger from "./Logger";
 
 export default class Game {
   constructor(body, width, height) {
-
     this.Canvas = new GameCanvas(body, width, height);
     this.Interface = new InterfaceBuilder(body, {
       system: "rgba(0, 0, 0, 0.3)",
@@ -52,42 +51,60 @@ export default class Game {
     if (yMin < 0) yMin = 0;
     if (xMax > mapSize) xMax = mapSize;
     if (yMax > mapSize) yMax = mapSize;
-    console.log(viewport.x, viewport.y);
-
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, width, height);
-    const mapTiles = {
-      wall: this.FileLoader.getTile("stonewall"),
-      ground: this.FileLoader.getTile("earthground"),
-    };
+    const mapTiles = [
+      this.FileLoader.getTile("earthground"),
+      this.FileLoader.getTile("stonewall"),
+    ];
     const mapBodies = [
       this.FileLoader.getTile("test1"),
       this.FileLoader.getTile("test2"),
     ];
-
-    for (let x = xMin; x < xMax; x++) {
-      for (let y = yMin; y < yMax; y++) {
+    ctx.fillStyle = "rgba(0, 0, 0, .7)";
+    for (let x = 0; x < mapSize; x++) {
+      for (let y = 0; y < mapSize; y++) {
         const tileX = Math.floor(
           x * TILE_SIZE - viewport.x + width * 0.5 - viewport.w * 0.5
         );
         const tileY = Math.floor(
           y * TILE_SIZE - viewport.y + height * 0.5 - viewport.h * 0.5
         );
-        if (map._map[x][y].blocked) {
-          ctx.drawImage(mapTiles.wall, tileX, tileY, TILE_SIZE, TILE_SIZE);
+        const { textureId, explored } = map._map[x][y];
+        if (explored) {
+          ctx.drawImage(
+            mapTiles[textureId],
+            tileX,
+            tileY,
+            TILE_SIZE,
+            TILE_SIZE
+          );
+        }
+        // Checking is tile in fov if not its darkened
+        if (!(x > xMin - 1 && x < xMax && y > yMin - 1 && y < yMax)) {
+          ctx.fillRect(tileX, tileY, TILE_SIZE, TILE_SIZE);
         } else {
-          ctx.drawImage(mapTiles.ground, tileX, tileY, TILE_SIZE, TILE_SIZE);
+          map._map[x][y].explored = true;
         }
       }
     }
     for (const { tileIndex, x, y } of actors.all) {
-      const actorX = Math.floor(
-        x * TILE_SIZE - viewport.x + width * 0.5 - viewport.w * 0.5
-      );
-      const actorY = Math.floor(
-        y * TILE_SIZE - viewport.y + height * 0.5 - viewport.h * 0.5
-      );
-      ctx.drawImage(mapBodies[tileIndex], actorX, actorY, TILE_SIZE, TILE_SIZE);
+      // Checking is actor in fov if not its dont drawn
+      if (x > xMin - 1 && x < xMax && y > yMin - 1 && y < yMax) {
+        const actorX = Math.floor(
+          x * TILE_SIZE - viewport.x + width * 0.5 - viewport.w * 0.5
+        );
+        const actorY = Math.floor(
+          y * TILE_SIZE - viewport.y + height * 0.5 - viewport.h * 0.5
+        );
+        ctx.drawImage(
+          mapBodies[tileIndex],
+          actorX,
+          actorY,
+          TILE_SIZE,
+          TILE_SIZE
+        );
+      }
     }
   }
 
@@ -111,8 +128,24 @@ export default class Game {
     this.FileLoader.loadTiles(["assets", "tiles", "level"], tileNames);
     this.FileLoader.loadTiles(["assets", "tiles", "bodies"], bodieNames);
 
+    const map = this.GameMap;
+    const mapSize = map.size;
+    const { player, actors } = this.Spawner;
+    let xMin = player.x - player.fov;
+    let yMin = player.y - player.fov;
+    let xMax = player.x + player.fov;
+    let yMax = player.y + player.fov;
+    if (xMin < 0) xMin = 0;
+    if (yMin < 0) yMin = 0;
+    if (xMax > mapSize) xMax = mapSize;
+    if (yMax > mapSize) yMax = mapSize;
+    for (let x = xMin; x < xMax; x++) {
+      for (let y = yMin; y < yMax; y++) {
+        map._map[x][y].explored = true;
+      }
+    }
+
     const moveOrAttack = (dx, dy) => {
-      const { player, actors } = this.Spawner;
       const newX = player.x + dx;
       const newY = player.y + dy;
       if (Math.abs(dx) < 2 && Math.abs(dy) < 2) {
@@ -126,7 +159,6 @@ export default class Game {
       }
     };
     const proceedIfNeeded = (event) => {
-      const { player } = this.Spawner;
       if (event instanceof KeyboardEvent) {
         //console.log(event.key);
         switch (event.key) {

@@ -2,7 +2,7 @@ import Viewport from "./Viewport";
 import { TILE_SIZE } from "../consts/File";
 
 export default class GameCanvas {
-  constructor(body, width, height, fovMult) {
+  constructor(body, width, height) {
     this._CANVAS = this._createCanvas(body, width, height);
     this._ctx = this._CANVAS.getContext("2d");
     this._ctx.imageSmoothingEnabled = false;
