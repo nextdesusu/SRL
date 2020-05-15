@@ -27,7 +27,7 @@ export default class Game {
       this.Canvas.setSize(width, height);
       this.Interface.setSize(width, height);
     });
-    this.GameMap.generateMap(40);
+    this.GameMap.generateMap(20);
     const seed = 100000;
     this.Spawner = new ActorFabric(
       new RandomGenerator(seed),
@@ -42,15 +42,8 @@ export default class Game {
     const map = this.GameMap;
     const mapSize = map.size;
     const { player, actors } = this.Spawner;
-    viewport.scrollTo(player.x * TILE_SIZE, player.y * TILE_SIZE);
-    let xMin = player.x - player.fov;
-    let yMin = player.y - player.fov;
-    let xMax = player.x + player.fov;
-    let yMax = player.y + player.fov;
-    if (xMin < 0) xMin = 0;
-    if (yMin < 0) yMin = 0;
-    if (xMax > mapSize) xMax = mapSize;
-    if (yMax > mapSize) yMax = mapSize;
+    const plrMapAdp = player.mapAdapter;
+    viewport.scrollTo(plrMapAdp.x * TILE_SIZE, plrMapAdp.y * TILE_SIZE);
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, width, height);
     const mapTiles = [
@@ -81,16 +74,17 @@ export default class Game {
           );
         }
         // Checking is tile in fov if not its darkened
-        if (!(x > xMin - 1 && x < xMax && y > yMin - 1 && y < yMax)) {
+        if (!plrMapAdp.isInFov(x, y)) {
           ctx.fillRect(tileX, tileY, TILE_SIZE, TILE_SIZE);
         } else {
           map._map[x][y].explored = true;
         }
       }
     }
-    for (const { tileIndex, x, y } of actors.all) {
+    for (const mapAdapter of map.actorsAdapters) {
       // Checking is actor in fov if not its dont drawn
-      if (x > xMin - 1 && x < xMax && y > yMin - 1 && y < yMax) {
+      const { x, y, tileIndex } = mapAdapter;
+      if (player.mapAdapter.isInFov(x, y)) {
         const actorX = Math.floor(
           x * TILE_SIZE - viewport.x + width * 0.5 - viewport.w * 0.5
         );
@@ -109,8 +103,8 @@ export default class Game {
   }
 
   botsTurn() {
-    const { actors } = this.Spawner;
-    for (const { ai } of actors.all) {
+    for (const adapter of this.GameMap.actorsAdapters) {
+      const { ai } = adapter.owner;
       if (ai !== null) {
         ai.takeTurn();
       }
@@ -131,10 +125,12 @@ export default class Game {
     const map = this.GameMap;
     const mapSize = map.size;
     const { player, actors } = this.Spawner;
-    let xMin = player.x - player.fov;
-    let yMin = player.y - player.fov;
-    let xMax = player.x + player.fov;
-    let yMax = player.y + player.fov;
+    const plrMapAdp = player.mapAdapter;
+    const { fov } = player.stats;
+    let xMin = plrMapAdp.x - fov;
+    let yMin = plrMapAdp.y - fov;
+    let xMax = plrMapAdp.x + fov;
+    let yMax = plrMapAdp.y + fov;
     if (xMin < 0) xMin = 0;
     if (yMin < 0) yMin = 0;
     if (xMax > mapSize) xMax = mapSize;
@@ -146,16 +142,16 @@ export default class Game {
     }
 
     const moveOrAttack = (dx, dy) => {
-      const newX = player.x + dx;
-      const newY = player.y + dy;
+      const newX = player.mapAdapter.x + dx;
+      const newY = player.mapAdapter.y + dy;
       if (Math.abs(dx) < 2 && Math.abs(dy) < 2) {
-        for (let actor of actors.all) {
-          if (actor.x === newX && actor.y === newY) {
-            player.fighter.attack(actor);
+        for (let actorAdapter of this.GameMap.actorsAdapters) {
+          if (actorAdapter.x === newX && actorAdapter.y === newY) {
+            player.fighter.attack(actorAdapter.owner);
             return;
           }
         }
-        player.move(dx, dy);
+        player.mapAdapter.move(dx, dy);
       }
     };
     const proceedIfNeeded = (event) => {

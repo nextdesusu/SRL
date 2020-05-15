@@ -14,6 +14,7 @@ export default class Stats {
     this.con = con;
     this.int = int;
     this.wis = wis;
+    this.fov = 4;
   }
 
   get maxHp() {

@@ -4,6 +4,21 @@ import Rect from "./Rect";
 export default class Map {
   constructor() {
     this._map = null;
+    this._actorsAdapters = [];
+  }
+
+  get actorsAdapters() {
+    return this._actorsAdapters;
+  }
+
+  deleteActorAdapter(toDelete) {
+    this._actorsAdapters = this._actorsAdapters.filter(
+      (actor) => actor !== toDelete
+    );
+  }
+
+  addActorAdapter(actor) {
+    this._actorsAdapters.push(actor.mapAdapter);
   }
 
   get size() {
@@ -13,8 +28,25 @@ export default class Map {
     return this._map.length;
   }
 
-  isBlocked(x, y) {
+  isWallAt(x, y) {
     return this._map[x][y].blocked;
+  }
+
+  isActorAt(x, y) {
+    for (const adapter of this._actorsAdapters) {
+      if (adapter.blocks && adapter.x === x && adapter.y === y) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  isItemAt(x, y) {
+    return false;
+  }
+
+  isObjectAt(x, y) {
+    return false;
   }
 
   generateMap(size) {

@@ -1,12 +1,8 @@
 export default class Actor {
-  constructor(name, fov, tileIndex, map, x, y, fighter, stats, actors, ai = null) {
+  constructor(name, mapAdapter, fighter, stats, ai = null) {
     this.name = name;
-    this.fov = fov;
-    this.tileIndex = tileIndex;
-    this.map = map;
-    this.x = x;
-    this.y = y;
-    this.actorsList = actors;
+    this.mapAdapter = mapAdapter;
+    mapAdapter.owner = this;
 
     stats.owner = this;
     this.stats = stats;
@@ -19,51 +15,12 @@ export default class Actor {
       ai.owner = this;
     }
     this.ai = ai;
-
-    this.blocks = true;
   }
 
-  moveTowards(targetX, targetY) {
-    const dist = this.distance(targetX, targetY);
-    const dx = Math.round((targetX - this.x) / dist);
-    const dy = Math.round((targetY - this.y) / dist);
-    this.move(dx, dy);
-  }
-
-  isBlocked(x, y) {
-    if (this.map.isBlocked(x, y)) {
-      return true;
+  die() {
+    this.mapAdapter.deleteFromMap();
+    if (this.ai) {
+      
     }
-    for (const actor of this.actorsList.all) {
-      if (actor.blocks && actor.x === x && actor.y === y) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  move(dx, dy) {
-    const newX = this.x + dx;
-    const newY = this.y + dy;
-    if (!this.isBlocked(newX, newY)) {
-      this.x = newX;
-      this.y = newY;
-    }
-    //Dev check
-    if (Math.abs(newX - this.x) > 1 || Math.abs(newY - this.y) > 1) {
-      throw Error("Cant move to more than one tile!");
-    }
-  }
-
-  distanceTo(other) {
-    const { x, y } = other;
-    return this.distance(x, y);
-  }
-
-  distance(x, y) {
-    const dx = x - this.x;
-    const dy = y - this.y;
-    return Math.sqrt(dx ** 2 + dy ** 2);
   }
 }

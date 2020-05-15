@@ -7,21 +7,20 @@ export default class Fighter {
   }
 
   attack(target) {
-    const damage = this.owner.stats.str;
-    this.Logger.battle(`${this.owner.name} атакует ${target.name} нанося ${damage} урона`);
+    const { str, dex } = this.owner.stats;
+    const damage = str + Math.floor(dex * 0.5);
+    this.Logger.battle(
+      `${this.owner.name} атакует ${target.name} нанося ${damage} урона`
+    );
     target.fighter.takeDamage(damage);
   }
 
   takeDamage(amount) {
     this.hp -= amount;
     if (this.hp < 1) {
-      this.die();
+      this.Logger.battle(`${this.owner.name} умирает`);
+      this.owner.die();
     }
-  }
-
-  die() {
-    this.Logger.battle(`${this.owner.name} умирает`);
-    this.owner.actorsList.remove(this.owner);
   }
 
   heal(amount) {

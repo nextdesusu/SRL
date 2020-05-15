@@ -11,7 +11,7 @@ export default class GameCanvas {
 
     this._cursorStartX = 0;
     this._cursorStartY = 0;
-    this.viewport = new Viewport(0, 0, width, height);
+    this.viewport = new Viewport(0, 0, 4 * TILE_SIZE, 4 * TILE_SIZE);
     this.setSize(width, height);
   }
 
