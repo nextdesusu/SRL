@@ -8,11 +8,13 @@ export class BaseAi {
 
   takeTurn() {
     const { owner, target } = this;
-    if (owner.mapAdapter.distanceTo(target) >= 2) {
-      const { x, y } = target.mapAdapter;
-      owner.mapAdapter.moveTowards(x, y);
-    } else {
-      owner.fighter.attack(target);
+    const { x, y } = target.mapAdapter;
+    if (owner.mapAdapter.isInFov(x, y)) {
+      if (owner.mapAdapter.distanceTo(target) >= 2) {
+        owner.mapAdapter.moveTowards(x, y);
+      } else {
+        owner.fighter.attack(target);
+      }
     }
   }
 }

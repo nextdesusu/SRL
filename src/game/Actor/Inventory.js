@@ -1,6 +1,7 @@
-export class Inventory {
+export default class Inventory {
   constructor() {
     this._putOnMe = new Array(9).fill(null);
+    this.owner = null;
   }
 
   get weaponLeft() {
