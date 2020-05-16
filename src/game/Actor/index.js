@@ -1,8 +1,8 @@
 export default class Actor {
-  constructor(name, mapAdapter, fighter, stats, inventory, ai = null) {
+  constructor(name, mapRepr, fighter, stats, inventory, ai = null) {
     this.name = name;
-    this.mapAdapter = mapAdapter;
-    mapAdapter.owner = this;
+    this.mapRepr = mapRepr;
+    mapRepr.owner = this;
 
     stats.owner = this;
     this.stats = stats;
@@ -20,7 +20,7 @@ export default class Actor {
   }
 
   die() {
-    this.mapAdapter.deleteFromMap();
+    this.mapRepr.deleteFromMap();
     if (this.ai) {
     }
   }

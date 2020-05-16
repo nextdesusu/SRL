@@ -4,21 +4,19 @@ import Rect from "./Rect";
 export default class Map {
   constructor() {
     this._map = null;
-    this._actorsAdapters = [];
+    this._actors = [];
   }
 
-  get actorsAdapters() {
-    return this._actorsAdapters;
+  get actors() {
+    return this._actors;
   }
 
-  deleteActorAdapter(toDelete) {
-    this._actorsAdapters = this._actorsAdapters.filter(
-      (actor) => actor !== toDelete
-    );
+  deleteActor(toDelete) {
+    this._actors = this._actors.filter((actor) => actor !== toDelete);
   }
 
-  addActorAdapter(actor) {
-    this._actorsAdapters.push(actor.mapAdapter);
+  addActor(actor) {
+    this._actors.push(actor);
   }
 
   get size() {
@@ -33,8 +31,8 @@ export default class Map {
   }
 
   isActorAt(x, y) {
-    for (const adapter of this._actorsAdapters) {
-      if (adapter.blocks && adapter.x === x && adapter.y === y) {
+    for (const { mapRepr } of this._actors) {
+      if (mapRepr.blocks && mapRepr.x === x && mapRepr.y === y) {
         return true;
       }
     }

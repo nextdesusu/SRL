@@ -41,9 +41,9 @@ export default class Game {
     const { ctx, viewport, width, height } = this.Canvas;
     const map = this.GameMap;
     const mapSize = map.size;
-    const { player, actors } = this.Spawner;
-    const plrMapAdp = player.mapAdapter;
-    viewport.scrollTo(plrMapAdp.x * TILE_SIZE, plrMapAdp.y * TILE_SIZE);
+    const { player } = this.Spawner;
+    const plrMapRepr = player.mapRepr;
+    viewport.scrollTo(plrMapRepr.x * TILE_SIZE, plrMapRepr.y * TILE_SIZE);
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, width, height);
     const mapTiles = [
@@ -74,17 +74,17 @@ export default class Game {
           );
         }
         // Checking is tile in fov if not its darkened
-        if (!plrMapAdp.isInFov(x, y)) {
+        if (!plrMapRepr.isInFov(x, y)) {
           ctx.fillRect(tileX, tileY, TILE_SIZE, TILE_SIZE);
         } else {
           map._map[x][y].explored = true;
         }
       }
     }
-    for (const mapAdapter of map.actorsAdapters) {
+    for (const actor of map.actors) {
       // Checking is actor in fov if not its dont drawn
-      const { x, y, tileIndex } = mapAdapter;
-      if (player.mapAdapter.isInFov(x, y)) {
+      const { x, y, tileIndex } = actor.mapRepr;
+      if (player.mapRepr.isInFov(x, y)) {
         const actorX = Math.floor(
           x * TILE_SIZE - viewport.x + width * 0.5 - viewport.w * 0.5
         );
@@ -103,8 +103,7 @@ export default class Game {
   }
 
   botsTurn() {
-    for (const adapter of this.GameMap.actorsAdapters) {
-      const { ai } = adapter.owner;
+    for (const { ai } of this.GameMap.actors) {
       if (ai !== null) {
         ai.takeTurn();
       }
@@ -125,12 +124,12 @@ export default class Game {
     const map = this.GameMap;
     const mapSize = map.size;
     const { player, actors } = this.Spawner;
-    const plrMapAdp = player.mapAdapter;
+    const plrMapRepr = player.mapRepr;
     const { fov } = player.stats;
-    let xMin = plrMapAdp.x - fov;
-    let yMin = plrMapAdp.y - fov;
-    let xMax = plrMapAdp.x + fov;
-    let yMax = plrMapAdp.y + fov;
+    let xMin = plrMapRepr.x - fov;
+    let yMin = plrMapRepr.y - fov;
+    let xMax = plrMapRepr.x + fov;
+    let yMax = plrMapRepr.y + fov;
     if (xMin < 0) xMin = 0;
     if (yMin < 0) yMin = 0;
     if (xMax > mapSize) xMax = mapSize;
@@ -142,16 +141,16 @@ export default class Game {
     }
 
     const moveOrAttack = (dx, dy) => {
-      const newX = player.mapAdapter.x + dx;
-      const newY = player.mapAdapter.y + dy;
+      const newX = player.mapRepr.x + dx;
+      const newY = player.mapRepr.y + dy;
       if (Math.abs(dx) < 2 && Math.abs(dy) < 2) {
-        for (let actorAdapter of this.GameMap.actorsAdapters) {
-          if (actorAdapter.x === newX && actorAdapter.y === newY) {
-            player.fighter.attack(actorAdapter.owner);
+        for (const actor of this.GameMap.actors) {
+          if (actor.mapRepr.x === newX && actor.mapRepr.y === newY) {
+            player.fighter.attack(actor);
             return;
           }
         }
-        player.mapAdapter.move(dx, dy);
+        player.mapRepr.move(dx, dy);
       }
     };
     const proceedIfNeeded = (event) => {
