@@ -1,79 +1,35 @@
+import { WearableItem, ConsumableItem } from "../Item";
+
 export default class Inventory {
   constructor() {
     this._putOnMe = new Array(9).fill(null);
+    this._storage = [];
     this.owner = null;
   }
 
-  get weaponLeft() {
-    return this._putOnMe[0];
+  deleteFromStorage(toDelete) {
+    this._storage = this._storage.filter((item) => item !== toDelete);
   }
 
-  set weaponLeft(newWeapon) {
-    this._putOnMe[0] = newWeapon;
+  pickUp(item) {
+    this._storage.push(item);
+    item.mapRepr.deleteFromMap();
   }
 
-  get weaponRight() {
-    return this._putOnMe[1];
+  wear(item) {
+    if (item instanceof WearableItem) {
+      let previousItem = this._putOnMe[item.slotIndex];
+      if (previousItem === null) {
+        this._putOnMe[item.slotIndex] = item;
+        this.deleteFromStoFrage(item);
+      }
+    }
   }
 
-  set weaponRight(newWeapon) {
-    this._putOnMe[1] = newWeapon;
-  }
-
-  get helmet() {
-    return this._putOnMe[2];
-  }
-
-  set helmet(newHelmet) {
-    this._putOnMe[2] = newHelmet;
-  }
-
-  get bodyArmour() {
-    return this._putOnMe[3];
-  }
-
-  set bodyArmour(newArmour) {
-    this._putOnMe[3] = newArmour;
-  }
-
-  get gloves() {
-    return this._putOnMe[4];
-  }
-
-  set gloves(newGloves) {
-    this._putOnMe[4] = newGloves;
-  }
-
-  get trousers() {
-    return this._putOnMe[5];
-  }
-
-  set trousers(newTrousers) {
-    this._putOnMe[5] = newTrousers;
-  }
-
-  get leftRing() {
-    return this._putOnMe[6];
-  }
-
-  set leftRing(newRing) {
-    this._putOnMe[6] = newRing;
-  }
-
-  get rightRing() {
-    return this._putOnMe[7];
-  }
-
-  set rightRing(newRing) {
-    this._putOnMe[7] = newRing;
-  }
-
-  get necklace() {
-    return this._putOnMe[8];
-  }
-
-  set necklace(newNeclace) {
-    this._putOnMe[8] = newNeclace;
+  consume(item) {
+    if (item instanceof ConsumableItem) {
+      this.deleteFromStoFrage(item);
+    }
   }
 
   get armour() {

@@ -4,7 +4,8 @@ import FileLoader from "./FileLoader";
 import RandomGenerator from "./RandomGenerator";
 import Map from "./Map";
 import ActorFabric from "./Fabric/ActorFabric";
-import { TILE_SIZE } from "./consts/File";
+import ItemFabric from "./Fabric/ItemFabric";
+import { TILE_SIZE, REAL_TILE_SIZE } from "./consts/File";
 import Logger from "./Logger";
 
 export default class Game {
@@ -35,15 +36,18 @@ export default class Game {
       this.Logger
     );
     this.Spawner.spawnPlayer("player", 3, 3);
+
+    const IF = new ItemFabric(this.GameMap);
+    IF.spawnHealPotion("heal potion", 10, 1, 1);
   }
 
   drawAll() {
     const { ctx, viewport, width, height } = this.Canvas;
     const map = this.GameMap;
     const mapSize = map.size;
-    const { player, actors } = this.Spawner;
-    const plrMapAdp = player.mapAdapter;
-    viewport.scrollTo(plrMapAdp.x * TILE_SIZE, plrMapAdp.y * TILE_SIZE);
+    const { player } = this.Spawner;
+    const plrMapRepr = player.mapRepr;
+    viewport.scrollTo(plrMapRepr.x * TILE_SIZE, plrMapRepr.y * TILE_SIZE);
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, width, height);
     const mapTiles = [
@@ -54,6 +58,9 @@ export default class Game {
       this.FileLoader.getTile("test1"),
       this.FileLoader.getTile("test2"),
     ];
+    const potionsTiles = [
+      this.FileLoader.getTile("potions"),
+    ]
     ctx.fillStyle = "rgba(0, 0, 0, .7)";
     for (let x = 0; x < mapSize; x++) {
       for (let y = 0; y < mapSize; y++) {
@@ -74,17 +81,17 @@ export default class Game {
           );
         }
         // Checking is tile in fov if not its darkened
-        if (!plrMapAdp.isInFov(x, y)) {
+        if (!plrMapRepr.isInFov(x, y)) {
           ctx.fillRect(tileX, tileY, TILE_SIZE, TILE_SIZE);
         } else {
           map._map[x][y].explored = true;
         }
       }
     }
-    for (const mapAdapter of map.actorsAdapters) {
+    for (const actor of map.actors) {
       // Checking is actor in fov if not its dont drawn
-      const { x, y, tileIndex } = mapAdapter;
-      if (player.mapAdapter.isInFov(x, y)) {
+      const { x, y, tileIndex } = actor.mapRepr;
+      if (player.mapRepr.isInFov(x, y)) {
         const actorX = Math.floor(
           x * TILE_SIZE - viewport.x + width * 0.5 - viewport.w * 0.5
         );
@@ -100,11 +107,32 @@ export default class Game {
         );
       }
     }
+    for (const item of map.items) {
+      const { x, y, tileIndex } = item.mapRepr;
+      if (player.mapRepr.isInFov(x, y)) {
+        const itemX = Math.floor(
+          x * TILE_SIZE - viewport.x + width * 0.5 - viewport.w * 0.5
+        );
+        const itemY = Math.floor(
+          y * TILE_SIZE - viewport.y + height * 0.5 - viewport.h * 0.5
+        );
+        ctx.drawImage(
+          potionsTiles[tileIndex],
+          0,
+          0,
+          16,
+          16,
+          itemX,
+          itemY,
+          TILE_SIZE,
+          TILE_SIZE
+        );
+      }
+    }
   }
 
   botsTurn() {
-    for (const adapter of this.GameMap.actorsAdapters) {
-      const { ai } = adapter.owner;
+    for (const { ai } of this.GameMap.actors) {
       if (ai !== null) {
         ai.takeTurn();
       }
@@ -121,16 +149,17 @@ export default class Game {
     const bodieNames = ["test1", "test2"];
     this.FileLoader.loadTiles(["assets", "tiles", "level"], tileNames);
     this.FileLoader.loadTiles(["assets", "tiles", "bodies"], bodieNames);
+    this.FileLoader.loadTileSet(["assets", "tiles", "items"], "potions");
 
     const map = this.GameMap;
     const mapSize = map.size;
     const { player, actors } = this.Spawner;
-    const plrMapAdp = player.mapAdapter;
+    const plrMapRepr = player.mapRepr;
     const { fov } = player.stats;
-    let xMin = plrMapAdp.x - fov;
-    let yMin = plrMapAdp.y - fov;
-    let xMax = plrMapAdp.x + fov;
-    let yMax = plrMapAdp.y + fov;
+    let xMin = plrMapRepr.x - fov;
+    let yMin = plrMapRepr.y - fov;
+    let xMax = plrMapRepr.x + fov;
+    let yMax = plrMapRepr.y + fov;
     if (xMin < 0) xMin = 0;
     if (yMin < 0) yMin = 0;
     if (xMax > mapSize) xMax = mapSize;
@@ -142,16 +171,22 @@ export default class Game {
     }
 
     const moveOrAttack = (dx, dy) => {
-      const newX = player.mapAdapter.x + dx;
-      const newY = player.mapAdapter.y + dy;
+      const newX = player.mapRepr.x + dx;
+      const newY = player.mapRepr.y + dy;
       if (Math.abs(dx) < 2 && Math.abs(dy) < 2) {
-        for (let actorAdapter of this.GameMap.actorsAdapters) {
-          if (actorAdapter.x === newX && actorAdapter.y === newY) {
-            player.fighter.attack(actorAdapter.owner);
+        for (const actor of this.GameMap.actors) {
+          if (actor.mapRepr.x === newX && actor.mapRepr.y === newY) {
+            player.fighter.attack(actor);
             return;
           }
         }
-        player.mapAdapter.move(dx, dy);
+        for (const item of this.GameMap.items) {
+          if (item.mapRepr.x === newX && item.mapRepr.y === newY) {
+            player.inventory.pickUp(item);
+          }
+        }
+        player.mapRepr.move(dx, dy);
+        console.log("player inventory", player.inventory._storage);
       }
     };
     const proceedIfNeeded = (event) => {

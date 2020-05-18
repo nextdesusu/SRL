@@ -1,13 +1,28 @@
-export default class MapAdapter {
+class MapRepresentation {
   constructor(tileIndex, map, x, y) {
     this.tileIndex = tileIndex;
     this.map = map;
     this.x = x;
     this.y = y;
-    this.blocks = true;
     this.owner = null;
   }
 
+  get blocks() {
+    return true;
+  }
+}
+
+export class ItemMapRepresentation extends MapRepresentation {
+  get blocks() {
+    return false;
+  }
+
+  deleteFromMap() {
+    this.map.deleteItem(this.owner);
+  }
+}
+
+export class ActorMapRepresentation extends MapRepresentation {
   moveTowards(targetX, targetY) {
     const dist = this.distance(targetX, targetY);
     const dx = Math.round((targetX - this.x) / dist);
@@ -40,11 +55,11 @@ export default class MapAdapter {
   }
 
   deleteFromMap() {
-    this.map.deleteActorAdapter(this);
+    this.map.deleteActor(this.owner);
   }
 
   distanceTo(other) {
-    const { x, y } = other.mapAdapter;
+    const { x, y } = other.mapRepr;
     return this.distance(x, y);
   }
 
