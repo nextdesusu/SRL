@@ -1,0 +1,1 @@
+export const WEAPON_ONE_HANDED_SLOT = 0;

@@ -12,6 +12,16 @@ class MapRepresentation {
   }
 }
 
+export class ItemMapRepresentation extends MapRepresentation {
+  get blocks() {
+    return false;
+  }
+
+  deleteFromMap() {
+    this.map.deleteItem(this.owner);
+  }
+}
+
 export class ActorMapRepresentation extends MapRepresentation {
   moveTowards(targetX, targetY) {
     const dist = this.distance(targetX, targetY);

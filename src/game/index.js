@@ -4,7 +4,8 @@ import FileLoader from "./FileLoader";
 import RandomGenerator from "./RandomGenerator";
 import Map from "./Map";
 import ActorFabric from "./Fabric/ActorFabric";
-import { TILE_SIZE } from "./consts/File";
+import ItemFabric from "./Fabric/ItemFabric";
+import { TILE_SIZE, REAL_TILE_SIZE } from "./consts/File";
 import Logger from "./Logger";
 
 export default class Game {
@@ -35,6 +36,9 @@ export default class Game {
       this.Logger
     );
     this.Spawner.spawnPlayer("player", 3, 3);
+
+    const IF = new ItemFabric(this.GameMap);
+    IF.spawnHealPotion("heal potion", 10, 1, 1);
   }
 
   drawAll() {
@@ -54,6 +58,9 @@ export default class Game {
       this.FileLoader.getTile("test1"),
       this.FileLoader.getTile("test2"),
     ];
+    const potionsTiles = [
+      this.FileLoader.getTile("potions"),
+    ]
     ctx.fillStyle = "rgba(0, 0, 0, .7)";
     for (let x = 0; x < mapSize; x++) {
       for (let y = 0; y < mapSize; y++) {
@@ -100,6 +107,28 @@ export default class Game {
         );
       }
     }
+    for (const item of map.items) {
+      const { x, y, tileIndex } = item.mapRepr;
+      if (player.mapRepr.isInFov(x, y)) {
+        const itemX = Math.floor(
+          x * TILE_SIZE - viewport.x + width * 0.5 - viewport.w * 0.5
+        );
+        const itemY = Math.floor(
+          y * TILE_SIZE - viewport.y + height * 0.5 - viewport.h * 0.5
+        );
+        ctx.drawImage(
+          potionsTiles[tileIndex],
+          0,
+          0,
+          16,
+          16,
+          itemX,
+          itemY,
+          TILE_SIZE,
+          TILE_SIZE
+        );
+      }
+    }
   }
 
   botsTurn() {
@@ -120,6 +149,7 @@ export default class Game {
     const bodieNames = ["test1", "test2"];
     this.FileLoader.loadTiles(["assets", "tiles", "level"], tileNames);
     this.FileLoader.loadTiles(["assets", "tiles", "bodies"], bodieNames);
+    this.FileLoader.loadTileSet(["assets", "tiles", "items"], "potions");
 
     const map = this.GameMap;
     const mapSize = map.size;
@@ -150,7 +180,13 @@ export default class Game {
             return;
           }
         }
+        for (const item of this.GameMap.items) {
+          if (item.mapRepr.x === newX && item.mapRepr.y === newY) {
+            player.inventory.pickUp(item);
+          }
+        }
         player.mapRepr.move(dx, dy);
+        console.log("player inventory", player.inventory._storage);
       }
     };
     const proceedIfNeeded = (event) => {

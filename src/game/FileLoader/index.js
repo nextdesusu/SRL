@@ -37,4 +37,14 @@ export default class FileLoader {
       this.setTile(fileName, _img);
     }
   }
+
+  loadTileSet(PathToTiles, name) {
+    const fpath = path.join(this._appPath, ...PathToTiles, `${name}.png`);
+    console.log("loadTileSet", fpath)
+    const loaded = fs.readFileSync(fpath);
+    const base64 = loaded.toString("base64");
+    const _img = new Image();
+    _img.src = `data:image/png;base64,${base64}`;
+    this.setTile(name, _img);
+  }
 }

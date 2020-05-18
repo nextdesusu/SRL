@@ -1,22 +1,28 @@
 import Tile from "./Tile";
 import Rect from "./Rect";
+import { Item } from "../Item";
 
 export default class Map {
   constructor() {
     this._map = null;
-    this._actors = [];
+    this.actors = [];
+    this.items = [];
   }
 
-  get actors() {
-    return this._actors;
+  addItem(item) {
+    this.items.push(item);
+  }
+
+  deleteItem(toDelete) {
+    this.items = this.items.filter((item) => item !== toDelete);
   }
 
   deleteActor(toDelete) {
-    this._actors = this._actors.filter((actor) => actor !== toDelete);
+    this.actors = this.actors.filter((actor) => actor !== toDelete);
   }
 
   addActor(actor) {
-    this._actors.push(actor);
+    this.actors.push(actor);
   }
 
   get size() {
@@ -30,8 +36,17 @@ export default class Map {
     return this._map[x][y].blocked;
   }
 
+  isItemAt(x, y) {
+    for (const { mapRepr } of this.items) {
+      if (mapRepr.x === x && mapRepr.y === y && mapRepr.owner instanceof Item) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   isActorAt(x, y) {
-    for (const { mapRepr } of this._actors) {
+    for (const { mapRepr } of this.actors) {
       if (mapRepr.blocks && mapRepr.x === x && mapRepr.y === y) {
         return true;
       }
