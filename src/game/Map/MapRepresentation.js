@@ -30,23 +30,14 @@ export class ActorMapRepresentation extends MapRepresentation {
     this.move(dx, dy);
   }
 
-  isBlocked(x, y) {
-    if (this.map.isWallAt(x, y)) {
-      return true;
-    }
-    if (this.map.isActorAt(x, y)) {
-    }
-    if (this.map.isObjectAt(x, y)) {
-    }
-    return false;
-  }
-
   move(dx, dy) {
     const newX = this.x + dx;
     const newY = this.y + dy;
-    if (!this.isBlocked(newX, newY)) {
+    if (!this.map.isBlocked(newX, newY)) {
+      this.map.deleteActor(this.owner);
       this.x = newX;
       this.y = newY;
+      this.map.placeActor(this.owner);
     }
     //Dev check
     if (Math.abs(newX - this.x) > 1 || Math.abs(newY - this.y) > 1) {

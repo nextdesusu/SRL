@@ -3,5 +3,9 @@ export default class Tile {
         this.blocked = blocked;
         this.textureId = tId;
         this.explored = expolred;
+
+        this.actorOn = null;
+        this.itemsOn = null;
+        this.objectOn = null;
     }
 }

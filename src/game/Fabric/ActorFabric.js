@@ -11,6 +11,7 @@ export default class ActorFabric {
     this.map = map;
     this.player = null;
     this.Logger = logger;
+    this.bots = [];
   }
   spawnPlayer(name, x, y) {
     if (this.player !== null) {
@@ -22,7 +23,7 @@ export default class ActorFabric {
     const inv = new Inventory();
     const player = new Actor(name, mapRepr, fighter, stats, inv);
     this.player = player;
-    this.map.addActor(player);
+    this.map.placeActor(player);
   }
   spawnTestMonster(x, y) {
     const mapRepr = new ActorMapRepresentation(1, this.map, x, y);
@@ -31,6 +32,7 @@ export default class ActorFabric {
     const ai = new BaseAi(this.player);
     const inv = new Inventory();
     const monster = new Actor("test-monster", mapRepr, fighter, stats, inv, ai);
-    this.map.addActor(monster);
+    this.map.placeActor(monster);
+    this.bots.push(ai);
   }
 }

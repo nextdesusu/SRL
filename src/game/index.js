@@ -58,9 +58,7 @@ export default class Game {
       this.FileLoader.getTile("test1"),
       this.FileLoader.getTile("test2"),
     ];
-    const potionsTiles = [
-      this.FileLoader.getTile("potions"),
-    ]
+    const potionsTiles = [this.FileLoader.getTile("potions")];
     ctx.fillStyle = "rgba(0, 0, 0, .7)";
     for (let x = 0; x < mapSize; x++) {
       for (let y = 0; y < mapSize; y++) {
@@ -70,7 +68,7 @@ export default class Game {
         const tileY = Math.floor(
           y * TILE_SIZE - viewport.y + height * 0.5 - viewport.h * 0.5
         );
-        const { textureId, explored } = map._map[x][y];
+        const { textureId, explored, actorOn, itemsOn } = map._map[x][y];
         if (explored) {
           ctx.drawImage(
             mapTiles[textureId],
@@ -81,61 +79,44 @@ export default class Game {
           );
         }
         // Checking is tile in fov if not its darkened
-        if (!plrMapRepr.isInFov(x, y)) {
-          ctx.fillRect(tileX, tileY, TILE_SIZE, TILE_SIZE);
-        } else {
+        if (plrMapRepr.isInFov(x, y)) {
           map._map[x][y].explored = true;
+          if (actorOn !== null) {
+            const { tileIndex } = actorOn.mapRepr;
+            ctx.drawImage(
+              mapBodies[tileIndex],
+              tileX,
+              tileY,
+              TILE_SIZE,
+              TILE_SIZE
+            );
+          }
+          if (itemsOn !== null) {
+            for (const item of itemsOn) {
+              const { tileIndex } = item.mapRepr;
+              ctx.drawImage(
+                potionsTiles[tileIndex],
+                0,
+                0,
+                16,
+                16,
+                tileX,
+                tileY,
+                TILE_SIZE,
+                TILE_SIZE
+              );
+            }
+          }
+        } else {
+          ctx.fillRect(tileX, tileY, TILE_SIZE, TILE_SIZE);
         }
-      }
-    }
-    for (const actor of map.actors) {
-      // Checking is actor in fov if not its dont drawn
-      const { x, y, tileIndex } = actor.mapRepr;
-      if (player.mapRepr.isInFov(x, y)) {
-        const actorX = Math.floor(
-          x * TILE_SIZE - viewport.x + width * 0.5 - viewport.w * 0.5
-        );
-        const actorY = Math.floor(
-          y * TILE_SIZE - viewport.y + height * 0.5 - viewport.h * 0.5
-        );
-        ctx.drawImage(
-          mapBodies[tileIndex],
-          actorX,
-          actorY,
-          TILE_SIZE,
-          TILE_SIZE
-        );
-      }
-    }
-    for (const item of map.items) {
-      const { x, y, tileIndex } = item.mapRepr;
-      if (player.mapRepr.isInFov(x, y)) {
-        const itemX = Math.floor(
-          x * TILE_SIZE - viewport.x + width * 0.5 - viewport.w * 0.5
-        );
-        const itemY = Math.floor(
-          y * TILE_SIZE - viewport.y + height * 0.5 - viewport.h * 0.5
-        );
-        ctx.drawImage(
-          potionsTiles[tileIndex],
-          0,
-          0,
-          16,
-          16,
-          itemX,
-          itemY,
-          TILE_SIZE,
-          TILE_SIZE
-        );
       }
     }
   }
 
   botsTurn() {
-    for (const { ai } of this.GameMap.actors) {
-      if (ai !== null) {
-        ai.takeTurn();
-      }
+    for (const ai of this.Spawner.bots) {
+      ai.takeTurn();
     }
   }
 
@@ -153,7 +134,7 @@ export default class Game {
 
     const map = this.GameMap;
     const mapSize = map.size;
-    const { player, actors } = this.Spawner;
+    const { player } = this.Spawner;
     const plrMapRepr = player.mapRepr;
     const { fov } = player.stats;
     let xMin = plrMapRepr.x - fov;
@@ -170,52 +151,51 @@ export default class Game {
       }
     }
 
-    const moveOrAttack = (dx, dy) => {
+    const playerTakeAction = (dx, dy) => {
       const newX = player.mapRepr.x + dx;
       const newY = player.mapRepr.y + dy;
       if (Math.abs(dx) < 2 && Math.abs(dy) < 2) {
-        for (const actor of this.GameMap.actors) {
-          if (actor.mapRepr.x === newX && actor.mapRepr.y === newY) {
-            player.fighter.attack(actor);
-            return;
-          }
+        const actorAt = this.GameMap.actorAt(newX, newY);
+        if (actorAt !== null) {
+          player.fighter.attack(actor);
+          return;
         }
-        for (const item of this.GameMap.items) {
-          if (item.mapRepr.x === newX && item.mapRepr.y === newY) {
+        const itemsAt = this.GameMap.itemsAt(newX, newY);
+        if (itemsAt !== null) {
+          for (const item of itemsAt) {
             player.inventory.pickUp(item);
           }
+          this.GameMap.deleteAllItems(newX, newY);
         }
         player.mapRepr.move(dx, dy);
-        console.log("player inventory", player.inventory._storage);
       }
     };
     const proceedIfNeeded = (event) => {
       if (event instanceof KeyboardEvent) {
-        //console.log(event.key);
         switch (event.key) {
           case "ArrowRight":
-            moveOrAttack(1, 0);
+            playerTakeAction(1, 0);
             break;
           case "ArrowLeft":
-            moveOrAttack(-1, 0);
+            playerTakeAction(-1, 0);
             break;
           case "ArrowUp":
-            moveOrAttack(0, -1);
+            playerTakeAction(0, -1);
             break;
           case "ArrowDown":
-            moveOrAttack(0, 1);
+            playerTakeAction(0, 1);
             break;
           case "PageDown":
-            moveOrAttack(1, 1);
+            playerTakeAction(1, 1);
             break;
           case "Home":
-            moveOrAttack(-1, -1);
+            playerTakeAction(-1, -1);
             break;
           case "PageUp":
-            moveOrAttack(1, -1);
+            playerTakeAction(1, -1);
             break;
           case "End":
-            moveOrAttack(-1, 1);
+            playerTakeAction(-1, 1);
             break;
         }
         this.nextTurn();
@@ -229,7 +209,7 @@ export default class Game {
       this.Spawner.spawnTestMonster(7, 8);
       window.addEventListener("keydown", proceedIfNeeded);
       window.addEventListener("mousedown", proceedIfNeeded);
-      this.nextTurn();
+      this.drawAll();
     }, 1000);
   }
 }

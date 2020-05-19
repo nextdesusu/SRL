@@ -5,24 +5,45 @@ import { Item } from "../Item";
 export default class Map {
   constructor() {
     this._map = null;
-    this.actors = [];
-    this.items = [];
+  }
+
+  deleteActor(actor) {
+    const { x, y } = actor.mapRepr;
+    const tile = this._map[x][y];
+    tile.actorOn = null;
+  }
+
+  placeActor(actor) {
+    const { x, y } = actor.mapRepr;
+    const tile = this._map[x][y];
+    if (tile.actorOn === null) {
+      tile.actorOn = actor;
+    }
   }
 
   addItem(item) {
-    this.items.push(item);
+    const { x, y } = item.mapRepr;
+    const tile = this._map[x][y];
+    if (tile.itemsOn === null) {
+      tile.itemsOn = [item];
+    } else {
+      tile.itemsOn.push(item);
+    }
   }
 
-  deleteItem(toDelete) {
-    this.items = this.items.filter((item) => item !== toDelete);
+  deleteItem(item) {
+    const { x, y } = item.mapRepr;
+    const tile = this._map[x][y];
+    if (tile.itemsOn.length > 1) {
+      tile.itemsOn = tile.itemsOn.filter((current) => current !== item);
+    } else {
+      tile.itemsOn = null;
+    }
   }
 
-  deleteActor(toDelete) {
-    this.actors = this.actors.filter((actor) => actor !== toDelete);
-  }
-
-  addActor(actor) {
-    this.actors.push(actor);
+  deleteAllItems(x, y) {
+    const tile = this._map[x][y];
+    tile.itemsOn = null;
   }
 
   get size() {
@@ -36,26 +57,18 @@ export default class Map {
     return this._map[x][y].blocked;
   }
 
-  isItemAt(x, y) {
-    for (const { mapRepr } of this.items) {
-      if (mapRepr.x === x && mapRepr.y === y && mapRepr.owner instanceof Item) {
-        return true;
-      }
-    }
-    return false;
+  isBlocked(x, y) {
+    const tile = this._map[x][y];
+    const actorBlocks = tile.actorOn ? tile.actorOn.blocks : false;
+    return tile.blocked && actorBlocks;
   }
 
-  isActorAt(x, y) {
-    for (const { mapRepr } of this.actors) {
-      if (mapRepr.blocks && mapRepr.x === x && mapRepr.y === y) {
-        return true;
-      }
-    }
-    return false;
+  itemsAt(x, y) {
+    return this._map[x][y].itemsOn;
   }
 
-  isItemAt(x, y) {
-    return false;
+  actorAt(x, y) {
+    return this._map[x][y].actorOn;
   }
 
   isObjectAt(x, y) {
